@@ -17,10 +17,51 @@
         margin-bottom: 8px;
       }
 
-      #subTitle {
+      .subTitle {
+        transition: opacity 0.8s ease;
+        opacity: 1;
         font-size: 32px;
         font-family: 'Geist Pixel', sans-serif;
         color: #555;
+      }
+
+      .fade-out {
+        opacity: 0;
+      }
+      
+      #letterButton {
+        background: #f27987;
+        border: 3px solid #555;
+        border-radius: 8px;
+        color: #fff7d6;
+        display: inline-block;
+        margin-top: 12px;
+        padding: 12px 20px;
+        font-size: 32px;
+        font-family: "Geist Pixel", sans-serif;
+        text-decoration: none;
+
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px);
+
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
+      }
+
+      #letterButton.show {
+        opacity:1;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+
+      #letterButton:hover {
+        transform: translateY(-6px)
+      }
+
+      #letterButton:active {
+        transform: translateY(0);
       }
     </style>
   </head>
@@ -30,6 +71,15 @@
       <div class="cake-container">
         <div class="cake" id="cake"></div>
       </div>
+
+      <a
+        id="letterButton"
+        href="birthday-letter.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        >
+          open letter! ♡
+      </a>
     </div>
 
     <script>
@@ -42,9 +92,18 @@
       const birthdayText = document.getElementById("birthdayText");
       birthdayText.innerHTML = `
         <div id="mainTitle">happy birthday blair! (˶ˆᗜˆ˵)</div>
-        <div id="subTitle"> it's not much, but i hope u like this gift! i'll buy u real cake in da future</div>
-        <div id="subTitle">make a wish and blow da candles~ i love u smmm <3</div>
-        <div id="subTitle">- angel!</div>
+
+        <div class="subTitle" id="subtitle1"> 
+          it's not much, but i hope u like this gift! i'll buy u real cake in da future
+        </div>
+
+        <div class="subTitle" id="subtitle2"> 
+          make a wish and blow da candles~ i love u smmmm <3
+        </div>
+        
+        <div class="subTitle" id="subtitle3"> 
+          - sincerely, angel!
+        </div>
       `;
 
       const cake = document.getElementById("cake");
@@ -106,34 +165,27 @@
 
           source.connect(analyser);
 
-          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          const dataArray = new Uint8Array(analyser.fftSize);
 
           let blown = false;
 
           function detectBlow() {
-            analyser.getByteFrequencyData(dataArray);
+            analyser.getByteTimeDomainData(dataArray);
 
-            let highFreqSum = 0;
-            let lowFreqSum = 0;
-
-            const midpoint = dataArray.length / 2;
+            let sum = 0;
 
             for (let i = 0; i < dataArray.length; i++) {
-              if (i < midpoint) {
-                lowFreqSum += dataArray[i];
-              } else {
-                highFreqSum += dataArray[i];
-              }
+                const sample = (dataArray[i] - 128) / 128;
+                sum += sample * sample
             }
 
-            const highAvg = highFreqSum / (dataArray.length / 2);
-            const lowAvg = lowFreqSum / (dataArray.length / 2);
+            const rms = Math.sqrt(sum / dataArray.length);
 
-            const ratio = highAvg / (lowAvg + 1);
+            console.log(rms);
 
-            const BLOW_RATIO_THRESHOLD = 0.5;
+            const BLOW_THRESHOLD = 0.12;
 
-            if (ratio > BLOW_RATIO_THRESHOLD && !blown) {
+            if (rms > BLOW_THRESHOLD && !blown) {
               blown = true;
               blowOutCandles();
             }
@@ -160,11 +212,25 @@
           }, delay);
         });
 
-        // Update subTitle after short delay
+        // Fade out
+        subtitle1.classList.add("fade-out");
+        subtitle2.classList.add("fade-out");
+        subtitle3.classList.add("fade-out");
+
         setTimeout(() => {
-          const subTitle = document.getElementById("subTitle");
-          subTitle.textContent = `yayy we did it, unc!`;
+          subtitle1.textContent = "yayy we did it, unc! ur an old man now hehe :3"
+          subtitle2.textContent = "i hope all ur wishes come true! eat a lot of good food today <3"
+          subtitle3.textContent = "here's another gift~"
+ 
+          subtitle1.classList.remove("fade-out");
+          subtitle2.classList.remove("fade-out");
+          subtitle3.classList.remove("fade-out");
         }, 1200);
+
+         setTimeout(() => {
+          const letterButton = document.getElementById("letterButton");
+          letterButton.classList.add("show");
+        }, 1800);
       }
 
       startMicDetection();
