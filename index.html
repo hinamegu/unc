@@ -212,7 +212,7 @@
           }, delay);
         });
 
-        // Fade out
+        // Brief delay after blowing the candles
         subtitle1.classList.add("fade-out");
         subtitle2.classList.add("fade-out");
         subtitle3.classList.add("fade-out");
@@ -225,12 +225,12 @@
           subtitle1.classList.remove("fade-out");
           subtitle2.classList.remove("fade-out");
           subtitle3.classList.remove("fade-out");
-        }, 1200);
+        }, 2400);
 
          setTimeout(() => {
           const letterButton = document.getElementById("letterButton");
           letterButton.classList.add("show");
-        }, 1800);
+        }, 3500);
       }
 
       startMicDetection();
